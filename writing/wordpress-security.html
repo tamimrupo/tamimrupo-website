@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What I check first when a WordPress site is hacked — Tamim Rupo</title>
+  <meta name="description" content="The first hour after discovering a compromised WordPress site is mostly about not making it worse. A practical checklist for backups, logs, access, cleanup, and hardening.">
+  <meta name="author" content="Tamim Rupo">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f7f3ea">
+  
+  <link rel="canonical" href="https://tamimrupo.com/writing/wordpress-security.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Tamim Rupo">
+  <meta property="og:title" content="What I check first when a WordPress site is hacked — Tamim Rupo">
+  <meta property="og:description" content="The first hour after discovering a compromised WordPress site is mostly about not making it worse. A practical checklist for backups, logs, access, cleanup, and hardening.">
+  <meta property="og:url" content="https://tamimrupo.com/writing/wordpress-security.html">
+  <meta property="og:image" content="https://tamimrupo.com/assets/img/og-paper.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What I check first when a WordPress site is hacked — Tamim Rupo">
+  <meta name="twitter:description" content="The first hour after discovering a compromised WordPress site is mostly about not making it worse. A practical checklist for backups, logs, access, cleanup, and hardening.">
+  <meta name="twitter:image" content="https://tamimrupo.com/assets/img/og-paper.png">
+
+  <link rel="icon" href="../assets/img/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=3">
+  <link rel="manifest" href="../site.webmanifest?v=3">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <link rel="alternate" type="application/rss+xml" title="Tamim Rupo — Writing" href="https://tamimrupo.com/writing/feed.xml">
+  <link rel="stylesheet" href="../assets/css/paper.css?v=1">
+  <link rel="stylesheet" href="../assets/css/paper-inner.css?v=1">
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "What I check first when a WordPress site is hacked",
+  "description": "The first hour after discovering a compromised WordPress site is mostly about not making it worse. A practical checklist for backups, logs, access, cleanup, and hardening.",
+  "datePublished": "2026-09-12",
+  "dateModified": "2026-09-12",
+  "author": {
+    "@type": "Person",
+    "name": "Tamim Rupo",
+    "url": "https://tamimrupo.com/index.html#about"
+  },
+  "mainEntityOfPage": "https://tamimrupo.com/writing/wordpress-security.html",
+  "image": "https://tamimrupo.com/assets/img/og-paper.png"
+}
+  </script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html" aria-label="Tamim Rupo — home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M24 2c1.2 13.5 8.5 20.8 22 22-13.5 1.2-20.8 8.5-22 22-1.2-13.5-8.5-20.8-22-22C15.5 22.8 22.8 15.5 24 2Z" fill="currentColor"/></svg>
+        </span>
+        <span class="brand__name">Tamim Rupo <span>Web developer · Dhaka</span></span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="../index.html#work">Work</a>
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#notes" aria-current="page">Notes</a>
+        <a href="../contact.html">Contact</a>
+      </nav>
+
+      <a class="btn btn--yellow btn--sm header-cta" href="../contact.html">Say hello <span class="btn__arrow" aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main id="main">
+      <article class="article">
+        <div class="article-hero">
+          <div class="shell article-hero__inner">
+            <a class="article__back" href="../index.html#notes">← All notes</a>
+            <header>
+              <p class="article__meta">
+                <time datetime="2026-09-12">12 September 2026</time>
+                <span>6 min read</span>
+              </p>
+              <h1>What I check first when a WordPress site is hacked</h1>
+              <p class="article__lede">The first hour is mostly about not making things worse. This is the order I work in.</p>
+            </header>
+          </div>
+        </div>
+
+        <div class="prose article__body">
+          <p>A compromised WordPress site is an emergency, but it's not a race. Deleting a suspicious file or reinstalling WordPress in a panic can destroy the evidence you need to find the actual entry point. I'd rather move carefully for an hour than clean the same site twice.</p>
+
+<h2>1. Take a snapshot before you touch anything</h2>
+<p>Get a full copy of the files and the database. If the host has daily backups, take a new one now. If you have SSH and WP-CLI, export the database and archive the site:</p>
+<pre tabindex="0"><code>wp db export before-cleanup.sql
+tar -czf files-before-cleanup.tar.gz wp-content</code></pre>
+<p>Keep the snapshot somewhere outside the hosting account. You may need it to compare files, recover content, or prove what happened. It also gives you a rollback point if the cleanup goes wrong.</p>
+
+<h2>2. Find out how they got in</h2>
+<p>A clean site is not the same as a secure site. Before removing anything, check the access logs, the list of WordPress users, recent plugin and theme changes, and any unfamiliar scheduled tasks or admin accounts. Common entry points are outdated plugins, weak or reused passwords, stolen FTP/SFTP credentials, and nulled themes.</p>
+<p>If the host has a WAF or access logs, ask for the relevant window. The entry point usually leaves a trace, even if it's just a request to a vulnerable file.</p>
+
+<h2>3. Stabilize access</h2>
+<p>Reset passwords for WordPress administrators, hosting, FTP/SFTP, the database, and any services connected to the site. Rotate the WordPress salts in <code>wp-config.php</code>. Remove unknown admin users and check for backdoors in <code>mu-plugins</code> and theme files. If the host has isolated the account, coordinate with them before making changes.</p>
+<p>Don't skip the accounts that feel unrelated. Email, DNS, and deployment accounts can all be used to get back in.</p>
+
+<h2>4. Clean files and data</h2>
+<p>Compare WordPress core against a fresh copy and reinstall anything that doesn't match (<code>wp core verify-checksums</code> is a useful start). Remove plugins and themes that aren't in use. Scan uploads for executable files. Search the database for injected scripts, unexpected options, and modified post content. One scanner is not enough; check the files and the database separately.</p>
+<p>If the site has been compromised more than once, or the codebase is old and heavily customized, a clean rebuild is often faster and safer than an endless cleanup. Move the content carefully and scan it on the way.</p>
+
+<h2>5. Harden the boring parts</h2>
+<p>Updates, least-privilege accounts, two-factor authentication for administrators, working backups, file permissions, and monitoring. None of this is exciting, but it's what makes the next attempt fail.</p>
+<p>A hacked site is usually a symptom of something that was left alone for too long. The cleanup is the visible part. The maintenance is the real fix.</p>
+
+<p>If you're dealing with a compromised site and need a second pair of eyes, email me. I can't promise a magic fix, but I can tell you what I'd check first.</p>
+        </div>
+
+        <footer class="article__footer">
+          <p>If you have a question, or a site that needs this kind of work, email <a href="mailto:tamim@tamimrupo.com">tamim@tamimrupo.com</a>.</p>
+        </footer>
+
+        <nav class="article__nav" aria-label="More writing">
+        <span></span>
+        <a href="wordpress-architecture.html">Page builders are fine. The architecture still matters. →</a>
+        </nav>
+      </article>
+    </main>
+    <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <a class="footer-brand" href="../index.html" aria-label="Tamim Rupo — home">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M24 2c1.2 13.5 8.5 20.8 22 22-13.5 1.2-20.8 8.5-22 22-1.2-13.5-8.5-20.8-22-22C15.5 22.8 22.8 15.5 24 2Z" fill="currentColor"/></svg>
+          </span>
+          <span class="footer-word">Tamim <em>Rupo</em>.</span>
+        </a>
+
+        <nav class="footer-links" aria-label="Footer">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#about">About</a>
+          <a href="../index.html#services">Services</a>
+          <a href="../index.html#notes">Notes</a>
+          <a href="../contact.html">Contact</a>
+          <a href="https://github.com/tamimrupo" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://www.linkedin.com/in/tamimrupo/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="mailto:tamim@tamimrupo.com">Email</a>
+          <a href="../writing/feed.xml">RSS</a>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          <svg class="doodle footer-cat" viewBox="0 0 120 110" aria-hidden="true">
+            <path d="M32 98c-4-19 4-39 18-48 5-3 11-4 17-2 14 4 23 20 21 50Z"/>
+            <path d="M38 48c-2-18 10-32 27-32s29 14 27 32c-2 15-12 24-27 24S40 63 38 48Z"/>
+            <path d="M47 30 42 12l17 9M79 30 84 12l-17 9"/>
+            <path d="M52 48h.1M69 48h.1M57 56c2 3 6 3 9 0"/>
+          </svg>
+          © <span data-year>2026</span> Tamim Rupo · Dhaka, Bangladesh
+        </p>
+        <p class="footer-bottom__thanks">Thanks for looking. <a class="footer-top-link" href="#top">Back to top ↑</a></p>
+      </div>
+    </div>
+  </footer>
+  <script src="../assets/js/paper.js"></script>
+</body>
+</html>

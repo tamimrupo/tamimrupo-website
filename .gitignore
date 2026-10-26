@@ -1,0 +1,6 @@
+﻿# Static site
+Thumbs.db
+.DS_Store
+_og.html
+shots/
+node_modules/

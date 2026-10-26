@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tamim Rupo — Writing</title>
+    <link>https://tamimrupo.com/#notes</link>
+    <description>Notes on WordPress, security, and web performance by Tamim Rupo.</description>
+    <language>en</language>
+    <lastBuildDate>Mon, 26 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://tamimrupo.com/writing/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>What I check first when a WordPress site is hacked</title>
+      <link>https://tamimrupo.com/writing/wordpress-security.html</link>
+      <guid>https://tamimrupo.com/writing/wordpress-security.html</guid>
+      <description>The first hour after discovering a compromised WordPress site is mostly about not making it worse. A practical checklist for backups, logs, access, cleanup, and hardening.</description>
+      <pubDate>Sat, 12 Sep 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Page builders are fine. The architecture still matters.</title>
+      <link>https://tamimrupo.com/writing/wordpress-architecture.html</link>
+      <guid>https://tamimrupo.com/writing/wordpress-architecture.html</guid>
+      <description>Where Elementor helps, where it gets in the way, and why structured content still matters in WordPress projects.</description>
+      <pubDate>Mon, 03 Aug 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>A performance checklist for real phones</title>
+      <link>https://tamimrupo.com/writing/performance-checklist.html</link>
+      <guid>https://tamimrupo.com/writing/performance-checklist.html</guid>
+      <description>A practical WordPress performance checklist: images, fonts, CSS, JavaScript, caching, hosting, and testing on the devices people actually use.</description>
+      <pubDate>Sat, 20 Jun 2026 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
