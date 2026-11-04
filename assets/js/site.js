@@ -91,115 +91,186 @@
     }
   }
 
-  /* ---------------------------------------------------------- hero canvas */
+  /* ---------------------------------------------------------- hero cipher */
+  /* Reference-style cipher field: an aligned grid of small monospace glyphs
+     that glows lavender out of the dark. Nearly invisible at the top, pooled
+     toward the foot of the hero, and lit by a pointer-following light. */
   (function heroField() {
     var canvas = document.getElementById("hero-field");
     var hero = document.querySelector(".hero");
     if (!canvas || !hero) return;
 
     var ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    var baseCanvas = document.createElement("canvas");
+    var bctx = baseCanvas.getContext("2d");
+    if (!ctx || !bctx) return;
 
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var DPR = Math.min(window.devicePixelRatio || 1, 2);
-    var CELL = 30;
-    var CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]()<>/\\|=+-*#%&@$?!:;.,~^✦";
-    var W = 0, H = 0, cells = [], frame = 0, running = true;
-    var pointer = { x: 0, y: 0, tx: 0, ty: 0, active: false };
-    var idlePhase = 0;
-    var start = Date.now();
+    var CELL_W = 26, CELL_H = 27;
+    var FONT = '400 11px "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+    var GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]()<>/\\|=+-*#%&@$?!:;.,~^";
+    var W = 0, H = 0, cells = [], frame = 0, running = true, churnTimer = 0;
+    var light = { x: 0, y: 0, tx: 0, ty: 0, on: false };
+    var idlePhase = 0, t0 = performance.now();
 
     function glyph() {
-      return CHARS.charAt((Math.random() * CHARS.length) | 0);
+      return GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
+    }
+
+    function paintCell(c) {
+      if (c.a < 0.015) return;
+      bctx.fillStyle = "rgba(152, 136, 188, " + c.a.toFixed(3) + ")";
+      bctx.fillText(c.ch, c.x, c.y);
+    }
+
+    function redrawBase() {
+      bctx.clearRect(0, 0, W, H);
+      bctx.font = FONT;
+      bctx.textAlign = "center";
+      bctx.textBaseline = "middle";
+      for (var i = 0; i < cells.length; i++) paintCell(cells[i]);
     }
 
     function build() {
       W = hero.offsetWidth;
       H = hero.offsetHeight;
-      canvas.width = Math.floor(W * DPR);
-      canvas.height = Math.floor(H * DPR);
+      var pw = Math.floor(W * DPR), ph = Math.floor(H * DPR);
+      canvas.width = pw;
+      canvas.height = ph;
       canvas.style.width = W + "px";
       canvas.style.height = H + "px";
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.font = FONT;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      baseCanvas.width = pw;
+      baseCanvas.height = ph;
+      bctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
       cells = [];
-      for (var y = CELL * 0.6; y < H; y += CELL) {
-        for (var x = CELL * 0.6; x < W; x += CELL) {
-          cells.push({
-            hx: x + (Math.random() - 0.5) * 16,
-            hy: y + (Math.random() - 0.5) * 14,
-            ch: glyph(),
-            rot: (Math.random() - 0.5) * 0.5,
-            size: 10 + Math.random() * 5,
-            amp: 2 + Math.random() * 5,
-            spd: 0.5 + Math.random() * 1.1,
-            ph: Math.random() * Math.PI * 2
-          });
+      var cols = Math.ceil(W / CELL_W);
+      var rows = Math.ceil(H / CELL_H);
+      var copyX = W * 0.5, copyY = H * 0.47;
+      var copyRX = Math.max(320, W * 0.46), copyRY = Math.max(260, H * 0.44);
+
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var x = c * CELL_W + CELL_W * 0.5;
+          var y = r * CELL_H + CELL_H * 0.5;
+
+          /* gentle undulation across the rows, like the reference field */
+          var wave = Math.sin(x * 0.0085 + r * 0.55) * 5 + Math.sin(x * 0.019 - r * 0.3) * 2;
+
+          /* resting floor: a faint grid everywhere, pooled at the foot */
+          var ny = y / H;
+          var a = 0.045 + Math.pow(ny, 3) * 0.28;
+
+          /* the violet glow at the foot of the hero lights the glyphs too */
+          var gx = (x - W * 0.5) / (W * 0.82);
+          var gy = (y - H * 1.03) / (H * 0.78);
+          var g = Math.max(0, 1 - Math.sqrt(gx * gx + gy * gy));
+          a += g * g * 0.12;
+
+          /* the sides of the field fall away so the centre reads */
+          var edge = Math.min(x / W, 1 - x / W);
+          a *= 0.5 + 0.5 * Math.min(1, edge / 0.18);
+
+          /* keep the copy readable: the grid fades away behind the headline */
+          var ex = (x - copyX) / copyRX;
+          var ey = (y - copyY) / copyRY;
+          var ed = Math.sqrt(ex * ex + ey * ey);
+          if (ed < 1.35) a *= 0.12 + 0.88 * Math.min(1, ed);
+
+          /* uneven glyph weights, like the reference field */
+          a *= 0.55 + Math.random() * 0.45;
+
+          a = Math.min(a, 0.42);
+          cells.push({ x: x, y: y + wave, a: a, ch: glyph() });
         }
       }
-      pointer.x = pointer.tx = W * 0.5;
-      pointer.y = pointer.ty = H * 0.4;
+
+      redrawBase();
+      /* paint the resting field straight away so it is there before the
+         first animation frame (and if scripting is throttled) */
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(baseCanvas, 0, 0, W, H);
+      light.x = light.tx = W * 0.5;
+      light.y = light.ty = H * 0.72;
     }
 
-    function draw(time) {
-      ctx.clearRect(0, 0, W, H);
-
-      pointer.x += (pointer.tx - pointer.x) * 0.18;
-      pointer.y += (pointer.ty - pointer.y) * 0.18;
-
-      var lx, ly;
-      if (pointer.active) {
-        lx = pointer.x;
-        ly = pointer.y;
-      } else {
-        idlePhase += 0.021;
-        lx = W * 0.5 + Math.sin(idlePhase) * W * 0.2;
-        ly = H * 0.42 + Math.cos(idlePhase * 0.7) * H * 0.1;
+    function churn() {
+      if (!running || reduce || document.hidden) return;
+      var n = Math.min(cells.length, 10);
+      bctx.font = FONT;
+      for (var i = 0; i < n; i++) {
+        var c = cells[(Math.random() * cells.length) | 0];
+        bctx.clearRect(c.x - 9, c.y - 11, 18, 22);
+        c.ch = glyph();
+        paintCell(c);
       }
+    }
 
-      var R = Math.max(160, Math.min(W, H) * 0.4);
-      var base = 0.14;
-      var t = time * 0.001;
-
+    function drawLit(lx, ly, drift) {
+      var R = Math.max(150, Math.min(W, H) * 0.36);
+      var R2 = R * R;
       for (var i = 0; i < cells.length; i++) {
         var c = cells[i];
-        var x = c.hx + Math.sin(t * c.spd + c.ph) * c.amp;
-        var y = c.hy + Math.cos(t * c.spd * 0.8 + c.ph) * c.amp;
-        var dx = x - lx, dy = y - ly;
-        var d = Math.sqrt(dx * dx + dy * dy);
-        var lit = 0;
-        if (d < R) {
-          lit = 1 - d / R;
-          lit = lit * lit * 0.85;
-        }
-        var alpha = base + lit;
-        if (alpha < 0.02) continue;
-
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(c.rot);
-        ctx.font = c.size + "px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        if (lit > 0.05) {
-          ctx.fillStyle = "rgba(203, 184, 255, " + alpha.toFixed(3) + ")";
-        } else {
-          ctx.fillStyle = "rgba(139, 124, 176, " + alpha.toFixed(3) + ")";
-        }
-        ctx.fillText(c.ch, 0, 0);
-        ctx.restore();
+        var dx = c.x - lx;
+        var dy = c.y + drift - ly;
+        var d2 = dx * dx + dy * dy;
+        if (d2 > R2) continue;
+        var k = 1 - Math.sqrt(d2) / R;
+        k = k * k;
+        var a = Math.min(0.8, c.a * 1.6 + k * 0.55);
+        ctx.fillStyle = "rgba(224, 211, 255, " + a.toFixed(3) + ")";
+        ctx.fillText(c.ch, c.x, c.y + drift);
       }
     }
 
-    function loop(time) {
+    function render(time) {
       if (!running) return;
-      draw(time);
-      frame = window.requestAnimationFrame(loop);
+      var t = (time - t0) / 1000;
+
+      light.x += (light.tx - light.x) * 0.16;
+      light.y += (light.ty - light.y) * 0.16;
+
+      var lx, ly;
+      if (light.on) {
+        lx = light.x;
+        ly = light.y;
+      } else {
+        idlePhase += 0.008;
+        lx = W * (0.5 + Math.sin(idlePhase) * 0.26);
+        ly = H * (0.76 + Math.cos(idlePhase * 0.75) * 0.1);
+      }
+
+      var drift = Math.sin(t * 0.22) * 2;
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(baseCanvas, 0, drift, W, H);
+      drawLit(lx, ly, drift);
+
+      frame = window.requestAnimationFrame(render);
+    }
+
+    function paintStill() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(baseCanvas, 0, 0, W, H);
+      light.on = true;
+      light.x = W * 0.5;
+      light.y = H * 0.72;
+      ctx.font = FONT;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      drawLit(light.x, light.y, 0);
     }
 
     function startLoop() {
       if (running || reduce) return;
       running = true;
-      frame = window.requestAnimationFrame(loop);
+      frame = window.requestAnimationFrame(render);
     }
 
     function stopLoop() {
@@ -210,18 +281,18 @@
 
     hero.addEventListener("pointermove", function (event) {
       var rect = hero.getBoundingClientRect();
-      pointer.tx = event.clientX - rect.left;
-      pointer.ty = event.clientY - rect.top;
-      pointer.active = true;
+      light.tx = event.clientX - rect.left;
+      light.ty = event.clientY - rect.top;
+      light.on = true;
     });
-    hero.addEventListener("pointerleave", function () { pointer.active = false; });
+    hero.addEventListener("pointerleave", function () { light.on = false; });
 
     var resizeTimer;
     window.addEventListener("resize", function () {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(function () {
         build();
-        if (reduce) { draw(performance.now()); }
+        if (reduce) paintStill(); else { ctx.clearRect(0, 0, W, H); }
       }, 160);
     });
 
@@ -239,9 +310,21 @@
 
     build();
     if (reduce) {
-      draw(2000);
+      paintStill();
     } else {
       startLoop();
+      churnTimer = window.setInterval(churn, 2600);
+      window.addEventListener("pagehide", function () {
+        window.clearInterval(churnTimer);
+      });
+    }
+
+    /* lay the grid out again once Geist Mono has actually loaded */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        build();
+        if (reduce) paintStill();
+      });
     }
   })();
 

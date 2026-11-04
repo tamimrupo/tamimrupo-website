@@ -638,9 +638,9 @@ strong { color: var(--ink); font-weight: 600; }
   padding: calc(var(--header-h) + clamp(3rem, 8vw, 6rem)) 0 clamp(2.5rem, 5vw, 4rem);
   overflow: hidden;
   background:
-    radial-gradient(70% 40% at 50% 112%, rgba(92, 58, 220, 0.42), rgba(13, 11, 20, 0) 70%),
-    radial-gradient(44% 80% at 0% 92%, rgba(92, 58, 220, 0.34), rgba(13, 11, 20, 0) 72%),
-    radial-gradient(44% 80% at 100% 92%, rgba(92, 58, 220, 0.32), rgba(13, 11, 20, 0) 72%),
+    radial-gradient(70% 42% at 50% 112%, rgba(92, 58, 220, 0.5), rgba(13, 11, 20, 0) 70%),
+    radial-gradient(44% 80% at 0% 92%, rgba(92, 58, 220, 0.38), rgba(13, 11, 20, 0) 72%),
+    radial-gradient(44% 80% at 100% 92%, rgba(92, 58, 220, 0.36), rgba(13, 11, 20, 0) 72%),
     linear-gradient(180deg, #100c1c 0%, var(--ink) 52%, #0f0c22 100%);
 }
 .hero__canvas {
@@ -656,7 +656,7 @@ strong { color: var(--ink); font-weight: 600; }
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(48% 46% at 50% 44%, rgba(13, 11, 20, 0.78), rgba(13, 11, 20, 0) 74%);
+  background: radial-gradient(50% 48% at 50% 44%, rgba(13, 11, 20, 0.72), rgba(13, 11, 20, 0) 74%);
 }
 .hero__inner {
   position: relative;
