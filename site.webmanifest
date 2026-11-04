@@ -1,11 +1,11 @@
 {
-  "name": "Tamim Rupo — Websites that feel human",
+  "name": "Tamim Rupo — Web developer in Dhaka",
   "short_name": "Tamim Rupo",
-  "description": "Web developer in Dhaka. I build, fix, and look after WordPress sites.",
+  "description": "Web developer in Dhaka. I build, fix, and look after WordPress sites that get results.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f3ea",
-  "theme_color": "#f7f3ea",
+  "background_color": "#0d0b14",
+  "theme_color": "#0d0b14",
   "icons": [
     {
       "src": "/assets/img/apple-touch-icon.png",

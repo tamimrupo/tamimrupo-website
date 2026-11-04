@@ -1,10 +1,14 @@
 # Tamim Rupo — personal website
 
-A one-page personal portfolio for **Tamim Rupo**, a web developer in Dhaka, Bangladesh.
-
 **Domain:** [tamimrupo.com](https://tamimrupo.com)
 
-No framework. No runtime build. No database. No analytics.
+A static site for **Tamim Rupo**, a web developer in Dhaka, Bangladesh. No framework, no build step,
+no database, no analytics.
+
+The design language is a dark violet / lime "AI-era" system adapted from
+[livingwithprompts.com](https://livingwithprompts.com): Bricolage Grotesque display type, Geist body
+text, Geist Mono labels, floating pill header, lime highlights, soft purple glows, and a footer with
+a giant wordmark.
 
 ---
 
@@ -12,8 +16,9 @@ No framework. No runtime build. No database. No analytics.
 
 | Page | File |
 | --- | --- |
-| Home / work / services / about / notes / contact | `index.html` |
-| Contact form | `contact.html` |
+| Home — newsletter landing ("I run a web agency with AI") | `index.html` |
+| Portfolio — work, about, services, notes | `portfolio.html` |
+| Contact + brief form | `contact.html` |
 | Case study: LankaBangla Investments | `work/lankabangla.html` |
 | Case study: 0xprial | `work/0xprial.html` |
 | Case study: InkPark Tattoo | `work/inkpark.html` |
@@ -24,7 +29,8 @@ No framework. No runtime build. No database. No analytics.
 | RSS feed | `writing/feed.xml` |
 | 404 | `404.html` |
 
-`work.html`, `about.html`, and `writing.html` are redirects to the matching home sections. They are excluded from the sitemap. `concept.html` now redirects to the homepage.
+`about.html`, `work.html`, and `writing.html` are styled redirects to the matching sections of
+`portfolio.html`. `concept.html` redirects home. They are excluded from `sitemap.xml`.
 
 ---
 
@@ -38,23 +44,65 @@ python -m http.server 4173
 
 Open <http://127.0.0.1:4173>.
 
+There is nothing to install or compile. `assets/css/site.css` and `assets/js/site.js` are the whole
+front end.
+
 ---
 
-## Design
+## Design system
 
-- Warm paper, black ink, and a yellow highlighter
-- Instrument Serif for display, Manrope for body, IBM Plex Mono for metadata
-- Hand-built SVG line work: the crowd in the contact section, coffee, plants, cats, stars, tape, and torn-paper details
-- One-page home with a portrait and browser/phone collage, selected work, about, services, notes, and a yellow contact panel
-- Case studies and notes use the same paper system, with screenshot and article sheets
-- Hand-written CSS and JavaScript; no framework or component library
-- The contact form opens the visitor's email app; nothing is stored on the site
+### Colour
+
+| Token | Value | Use |
+| --- | --- | --- |
+| Ink | `#0d0b14` | dark sections, text |
+| Paper | `#fbfaff` | light sections |
+| Lavender paper | `#f3ecff` / `#ede9f6` | soft panels, chips |
+| Violet | `#7946e3` / `#5f2ec7` | links, labels, buttons |
+| Lime | `#c8f136` | highlights, badges, checks |
+| Body text | `#544e60`, muted `#766e80` | copy |
+| On-dark text | `#fbfaff`, `#c7bed7` | copy on ink |
+
+### Type
+
+- Display: **Bricolage Grotesque** 700–800, tight tracking (`-0.035em` … `-0.05em`)
+- Body: **Geist** 400–600
+- Labels / meta: **Geist Mono**, uppercase, wide tracking
+- Hand notes: **Caveat**
+
+All fonts load from Google Fonts in each page's `<head>`.
+
+### Components (all in `assets/css/site.css`)
+
+- Floating white pill header with lime CTA and mobile menu (`.site-header`, `.header-pill`)
+- Arrow buttons whose violet circle expands on hover (`.btn-arrow`, `--light`, `--dark`, `--lime`)
+- Lime badges, violet tags, mono eyebrows
+- Work cards with browser-framed screenshots (`.work-card`, `.browser`)
+- Numbered lists, lime check lists, stats, quotes
+- Portrait card with sticker badge and live Dhaka clock
+- 3D fan of project screenshots (`.fan`)
+- Dark feature sections with violet glow (`.section--dark`, `.section--glow`)
+- CTA band with a CSS keyboard that fades into the section
+- Giant footer wordmark with lime chip
+- Case-study / note article layout (`.page-hero`, `.article-cover`, `.article-grid`, `.prose`, `.facts`)
+- Contact form card (`.contact-grid`, `.form-card`, `.field`)
+
+### Motion
+
+`assets/js/site.js` adds:
+
+- the animated character field behind the hero (canvas, pointer-reactive, off-screen pause,
+  `prefers-reduced-motion` aware)
+- scroll-triggered reveals (`.reveal` → `.is-visible`)
+- a header that hides on scroll down and returns on scroll up
+- the mobile menu, live Dhaka clock, current year, the generated keyboard keys
+- the two mailto forms
 
 ---
 
 ## Edit your details
 
-The following appear across the site. Search and replace:
+Search and replace across the site:
 
 - `tamim@tamimrupo.com`
 - `+8801792102049` / `+880 1792 102049`
@@ -62,52 +110,52 @@ The following appear across the site. Search and replace:
 - `linkedin.com/in/tamimrupo`
 - `behance.net/tamimrupo`
 
-The header and footer are duplicated across pages. If you change them, update the home, contact, 404, case-study, and note pages.
+The header and footer are duplicated in every page. If you change them, update the home, portfolio,
+contact, 404, case-study, and note pages (subfolder pages use `../` paths).
 
 ### Portrait
 
-The current portrait is the illustration from GitHub (`assets/img/tamim-github.png`). It is used in the About polaroid and the social card. The hero uses the transparent sticker version (`assets/img/tamim-cutout.png`).
-
-Replace both with a real portrait when available. A square or portrait crop works for the About frame; a cut-out version is ideal for the hero.
+- `assets/img/tamim-cutout.png` — transparent sticker used on the homepage portrait card.
+- `assets/img/tamim-github.png` — square illustration used in note author cards.
+- Replace both with a real portrait when available. A cut-out PNG (roughly 1000 × 1000) works best
+  for the portrait card; a square crop is fine for author cards.
 
 ### Work images
 
-Project screenshots live in `assets/screens/` at **1440 × 810**. The home and case-study pages use the full screenshots inside paper browser frames.
-
-### Case studies and notes
-
-Case studies are in `work/`; notes are in `writing/`. The case-study years, client names, and roles are based on the public profile and portfolio. Confirm them before publishing.
+Project screenshots live in `assets/screens/` at **1440 × 810** (`*.jpg`). The home, portfolio and
+case-study pages show them inside browser frames. That is the only image set the site needs now.
 
 ---
 
-## Contact form
+## Forms
 
-The form currently opens the visitor's email app:
+Both forms open the visitor's email app — nothing is stored on the site.
 
-1. Fill in the fields.
-2. JavaScript builds a `mailto:` link.
-3. The fallback `action` is also `mailto:`.
+- Newsletter (`[data-join-form]` on the homepage): `site.js` builds a `mailto:` with the email.
+- Contact (`#contact-form` in `contact.html`): `site.js` builds a `mailto:` with name, email and
+  message. The form fallback `action` is also `mailto:`.
 
-The form handler is `assets/js/paper-contact.js`. To use a real form service, replace the form action in `contact.html` and remove that script.
+To use a real form/newsletter service (Buttondown, Kit, Formspree, etc.), replace the form `action`
+and remove the matching handler from `assets/js/site.js`.
 
 ---
 
 ## SEO and assets
 
-- Canonical and Open Graph URLs point to `https://tamimrupo.com/`.
-- Social preview: `assets/img/og-paper.png` (1200 × 630).
-- Favicon: `assets/img/favicon.svg`.
-- Apple touch icon: `assets/img/apple-touch-icon.png`.
-- Sitemap: `sitemap.xml`.
-- Robots: `robots.txt`.
-- RSS: `writing/feed.xml`.
-- Structured data: Person on the home page, BlogPosting on each note, CreativeWork on each case study.
+- Canonical and Open Graph URLs point at `https://tamimrupo.com/`.
+- Social preview: `assets/img/og-ai.png` (1200 × 630). Source lives in `.ref/og-source.html`
+  (not deployed) if you need to regenerate it.
+- Favicon: `assets/img/favicon.svg`; Apple touch icon: `assets/img/apple-touch-icon.png`.
+- `sitemap.xml`, `robots.txt`, `site.webmanifest`, `writing/feed.xml`.
+- Structured data: Person on the home/portfolio pages, CreativeWork on each case study,
+  BlogPosting on each note.
+- The site ships `.nojekyll` for GitHub Pages.
 
 ---
 
 ## Deploy
 
-This is a static site, deployed with **GitHub Pages**.
+Static site, deployed with **GitHub Pages**.
 
 - Repository: `tamimrupo/tamimrupo-website`
 - Branch: `main`
@@ -131,13 +179,18 @@ The domain uses Cloudflare nameservers. To point the apex at GitHub Pages:
 | AAAA | `@` | `2606:50c0:8003::153` | DNS only |
 | CNAME | `www` | `tamimrupo.github.io` | DNS only |
 
-Remove the old WordPress A/AAAA records for `tamimrupo.com` first. Leave MX/TXT records alone; email is separate. After the DNS records resolve, enable **Enforce HTTPS** in GitHub Pages.
+Remove any old WordPress A/AAAA records for `tamimrupo.com` first. Leave MX/TXT records alone;
+email is separate. After the records resolve, enable **Enforce HTTPS** in GitHub Pages.
 
 ---
 
 ## Notes
 
-- Fonts are loaded from Google Fonts (Instrument Serif, Manrope, IBM Plex Mono).
-- Case study live links point to client sites. Remove a link if a project is no longer public.
-- Confirm the four headline numbers (years, projects, companies, industries) before publishing.
+- Confirm the four headline numbers (years, projects, ventures, industries) before publishing.
+- Case-study years, client names, and roles come from the public profile and portfolio — confirm
+  them before publishing.
 - The portrait is still a placeholder illustration; a real photo is the next upgrade.
+- The newsletter is a `mailto:` form, not a real list. Connect a provider when the list actually
+  launches.
+- Design reference: [livingwithprompts.com](https://livingwithprompts.com) — the layout language is
+  borrowed, not the content or assets.

@@ -1,6 +1,9 @@
-﻿# Static site
+# Static site
 Thumbs.db
 .DS_Store
 _og.html
 shots/
 node_modules/
+
+# Local analysis, screenshots and tooling (not part of the site)
+.ref/
