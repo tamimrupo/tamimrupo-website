@@ -1123,21 +1123,13 @@ strong { color: var(--ink); font-weight: 600; }
   display: grid;
   place-items: end center;
 }
-.portrait-card__media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(60% 40% at 50% 100%, rgba(200, 241, 54, 0.16), transparent 70%);
-  pointer-events: none;
-}
 .portrait-card__media img {
   position: relative;
   z-index: 1;
   width: 100%;
   height: 100%;
-  padding-top: 8%;
-  object-fit: contain;
-  object-position: center bottom;
+  object-fit: cover;
+  object-position: center top;
 }
 .portrait-card__chip {
   position: absolute;
