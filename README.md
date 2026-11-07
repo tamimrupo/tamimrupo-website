@@ -123,6 +123,8 @@ contact, 404, case-study, and note pages (subfolder pages use `../` paths).
   artwork and other portrait crops (1000 × 1100).
 - `assets/img/tamim-github.png` — square head-and-shoulders avatar used in note author cards
   (320 × 320).
+- `assets/img/tamim-cartoon.png` — the illustrated avatar, used as the tilted polaroid sticker in
+  the homepage hero (hidden on narrow screens).
 
 All of them are generated from the source photos in `.ref/art/` by
 `.ref/qa/make_portraits.py` (both paths are local-only and git-ignored). To swap in a new photo,
