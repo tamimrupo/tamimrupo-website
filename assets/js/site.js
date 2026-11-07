@@ -110,7 +110,7 @@
     var CELL_W = 26, CELL_H = 27;
     var FONT = '400 11px "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
     var GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]()<>/\\|=+-*#%&@$?!:;.,~^";
-    var W = 0, H = 0, cells = [], frame = 0, running = true, churnTimer = 0;
+    var W = 0, H = 0, cells = [], sparkles = [], frame = 0, running = true, churnTimer = 0;
     var light = { x: 0, y: 0, tx: 0, ty: 0, on: false };
     var idlePhase = 0, t0 = performance.now();
 
@@ -152,8 +152,8 @@
       cells = [];
       var cols = Math.ceil(W / CELL_W);
       var rows = Math.ceil(H / CELL_H);
-      var copyX = W * 0.5, copyY = H * 0.47;
-      var copyRX = Math.max(320, W * 0.46), copyRY = Math.max(260, H * 0.44);
+      var copyX = W * 0.5, copyY = H * 0.48;
+      var copyRX = Math.max(360, W * 0.5), copyRY = Math.max(300, H * 0.42);
 
       for (var r = 0; r < rows; r++) {
         for (var c = 0; c < cols; c++) {
@@ -165,13 +165,13 @@
 
           /* resting floor: a faint grid everywhere, pooled at the foot */
           var ny = y / H;
-          var a = 0.045 + Math.pow(ny, 3) * 0.28;
+          var a = 0.048 + Math.pow(ny, 3) * 0.3;
 
           /* the violet glow at the foot of the hero lights the glyphs too */
           var gx = (x - W * 0.5) / (W * 0.82);
           var gy = (y - H * 1.03) / (H * 0.78);
           var g = Math.max(0, 1 - Math.sqrt(gx * gx + gy * gy));
-          a += g * g * 0.12;
+          a += g * g * 0.13;
 
           /* the sides of the field fall away so the centre reads */
           var edge = Math.min(x / W, 1 - x / W);
@@ -181,14 +181,25 @@
           var ex = (x - copyX) / copyRX;
           var ey = (y - copyY) / copyRY;
           var ed = Math.sqrt(ex * ex + ey * ey);
-          if (ed < 1.35) a *= 0.12 + 0.88 * Math.min(1, ed);
+          if (ed < 1.25) a *= 0.06 + 0.94 * Math.min(1, ed);
 
           /* uneven glyph weights, like the reference field */
-          a *= 0.55 + Math.random() * 0.45;
+          a *= 0.52 + Math.random() * 0.48;
 
           a = Math.min(a, 0.42);
           cells.push({ x: x, y: y + wave, a: a, ch: glyph() });
         }
+      }
+
+      /* a handful of glyphs twinkle brighter than the resting field */
+      sparkles = [];
+      var sparkleCount = Math.min(cells.length, 24);
+      for (var s = 0; s < sparkleCount; s++) {
+        sparkles.push({
+          cell: cells[(Math.random() * cells.length) | 0],
+          ph: Math.random() * Math.PI * 2,
+          sp: 0.6 + Math.random() * 0.9
+        });
       }
 
       redrawBase();
@@ -213,7 +224,7 @@
     }
 
     function drawLit(lx, ly, drift) {
-      var R = Math.max(150, Math.min(W, H) * 0.36);
+      var R = Math.max(160, Math.min(W, H) * 0.38);
       var R2 = R * R;
       for (var i = 0; i < cells.length; i++) {
         var c = cells[i];
@@ -223,8 +234,20 @@
         if (d2 > R2) continue;
         var k = 1 - Math.sqrt(d2) / R;
         k = k * k;
-        var a = Math.min(0.8, c.a * 1.6 + k * 0.55);
-        ctx.fillStyle = "rgba(224, 211, 255, " + a.toFixed(3) + ")";
+        var a = Math.min(0.88, c.a * 1.65 + k * 0.62);
+        ctx.fillStyle = "rgba(228, 217, 255, " + a.toFixed(3) + ")";
+        ctx.fillText(c.ch, c.x, c.y + drift);
+      }
+    }
+
+    function drawSparkles(drift, t) {
+      for (var i = 0; i < sparkles.length; i++) {
+        var s = sparkles[i];
+        var c = s.cell;
+        var tw = 0.5 + 0.5 * Math.sin(t * 1.15 * s.sp + s.ph);
+        var a = Math.min(0.6, c.a + 0.12 * tw);
+        if (a < 0.04) continue;
+        ctx.fillStyle = "rgba(224, 212, 252, " + a.toFixed(3) + ")";
         ctx.fillText(c.ch, c.x, c.y + drift);
       }
     }
@@ -246,11 +269,12 @@
         ly = H * (0.76 + Math.cos(idlePhase * 0.75) * 0.1);
       }
 
-      var drift = Math.sin(t * 0.22) * 2;
+      var drift = Math.sin(t * 0.22) * 2.5;
 
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(baseCanvas, 0, drift, W, H);
       drawLit(lx, ly, drift);
+      drawSparkles(drift, t);
 
       frame = window.requestAnimationFrame(render);
     }
@@ -284,8 +308,16 @@
       light.tx = event.clientX - rect.left;
       light.ty = event.clientY - rect.top;
       light.on = true;
+      if (!reduce && rect.width && rect.height) {
+        hero.style.setProperty("--px", ((light.tx / rect.width) - 0.5).toFixed(3));
+        hero.style.setProperty("--py", ((light.ty / rect.height) - 0.5).toFixed(3));
+      }
     });
-    hero.addEventListener("pointerleave", function () { light.on = false; });
+    hero.addEventListener("pointerleave", function () {
+      light.on = false;
+      hero.style.setProperty("--px", "0");
+      hero.style.setProperty("--py", "0");
+    });
 
     var resizeTimer;
     window.addEventListener("resize", function () {
