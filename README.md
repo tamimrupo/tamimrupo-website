@@ -115,21 +115,23 @@ contact, 404, case-study, and note pages (subfolder pages use `../` paths).
 
 ### Portrait
 
-- `assets/img/tamim-standing-dark.jpg` — full-length photo composited on the dark violet studio
+- `assets/img/tamim-cartoon-card.png` — the illustrated avatar composited on the dark violet
   backdrop. Used in the homepage portrait card (1000 × 1100, exactly the card ratio).
-- `assets/img/tamim-standing.jpg` — the same full-length photo on the light lavender backdrop.
-  Used in the portfolio about card (1000 × 1100).
+- `assets/img/tamim-cartoon.png` — the illustrated avatar, also used as the tilted polaroid sticker
+  in the homepage hero (hidden on narrow screens).
+- `assets/img/tamim-standing.jpg` — full-length photo on the light lavender backdrop. Used in the
+  portfolio about card (1000 × 1100).
+- `assets/img/tamim-standing-dark.jpg` — full-length photo on the dark backdrop, kept as an
+  alternative portrait.
 - `assets/img/tamim-portrait.jpg` — headshot on the dark violet backdrop, kept for social/OG
   artwork and other portrait crops (1000 × 1100).
 - `assets/img/tamim-github.png` — square head-and-shoulders avatar used in note author cards
   (320 × 320).
-- `assets/img/tamim-cartoon.png` — the illustrated avatar, used as the tilted polaroid sticker in
-  the homepage hero (hidden on narrow screens).
 
-All of them are generated from the source photos in `.ref/art/` by
-`.ref/qa/make_portraits.py` (both paths are local-only and git-ignored). To swap in a new photo,
-replace the source files and re-run the script; it removes the studio background, clears colour
-spill from the edges, upscales/sharpens, and composes the photo onto the site's backdrops.
+The photo portraits are generated from the source photos in `.ref/art/` by
+`.ref/qa/make_portraits.py`, and the illustrated card by `.ref/qa/make_cartoon_card.py` (these
+paths are local-only and git-ignored). The scripts remove studio backgrounds, clear colour spill
+from the edges, upscale/sharpen, and compose the images onto the site's backdrops.
 
 ### Work images
 
