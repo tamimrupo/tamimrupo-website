@@ -419,13 +419,14 @@
       var email = String((joinInput && joinInput.value) || "").trim();
       if (!email) return;
 
-      var subject = "Add me to the Tamim Rupo updates list";
-      var body = "Please add this email to the list: " + email;
-      window.location.href = "mailto:tamim@tamimrupo.com?subject=" +
-        encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      // Hand the reader to the Every Monday newsletter signup (beehiiv), email prefilled.
+      var signup = "https://every-monday-newsletter.beehiiv.com/subscribe?email=" +
+        encodeURIComponent(email);
+      var opened = window.open(signup, "_blank", "noopener");
+      if (!opened) window.location.href = signup;
 
       if (joinStatus) {
-        joinStatus.textContent = "Your email app should open with the message filled in. If not, email tamim@tamimrupo.com.";
+        joinStatus.textContent = "Opening the signup page — confirm your subscription there to join Every Monday.";
       }
     });
   });
